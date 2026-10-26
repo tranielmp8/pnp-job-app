@@ -1,0 +1,253 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+/* Dark mode is opt-in via a `.dark` class on <html> (see app.html + ThemeToggle). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   PrideNPurpose theme (from theme.md). Prefixed --pnp-* so they don't collide
+   with Tailwind's own --color-* namespace.
+   --------------------------------------------------------------------------- */
+:root {
+	color-scheme: light;
+
+	--pnp-text: #17151a;
+	--pnp-text-muted: #625e66;
+
+	--pnp-primary: #c2410c;
+	--pnp-primary-deep: #7c2608;
+	--pnp-accent: #ef4444;
+	--pnp-highlight: #ea580c;
+	--pnp-brand-soft: #fed7aa;
+	--pnp-on-primary: #ffffff;
+
+	--pnp-background: #ffffff;
+	--pnp-surface: #ffffff;
+	--pnp-cream: #f7f7f8;
+	--pnp-border: #e4e2e6;
+	--pnp-nav: rgba(255, 255, 255, 0.9);
+
+	--pnp-on-dark: #ffffff;
+	--pnp-on-dark-muted: #d5c9e6;
+
+	--pnp-glow: rgba(239, 68, 68, 0.15);
+	--pnp-mark: rgba(194, 65, 12, 0.09);
+	--pnp-process-line: #dedbe1;
+
+	--pnp-gradient-background: none;
+	--pnp-gradient-brand: linear-gradient(135deg, #7c2508 0%, #d24d0c 52%, #ef4444 115%);
+	--pnp-gradient-contact: linear-gradient(135deg, #541707 0%, #b7350b 55%, #ef4444 130%);
+	--pnp-gradient-text: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #ef4444 100%);
+	--pnp-footer: #260b05;
+
+	/* App status colors (not in theme.md; chosen to sit with the palette). */
+	--pnp-danger: #b91c1c;
+	--pnp-success: #15803d;
+	--pnp-success-soft: rgba(21, 128, 61, 0.1);
+}
+
+.dark {
+	color-scheme: dark;
+
+	--pnp-text: #f6f2fc;
+	--pnp-text-muted: #aaa1b7;
+
+	--pnp-primary: #fb923c;
+	--pnp-primary-deep: #7c2d12;
+	--pnp-accent: #ef4444;
+	--pnp-highlight: #f97316;
+	--pnp-brand-soft: #e9b995;
+	/* Light orange needs dark text for contrast. */
+	--pnp-on-primary: #17151a;
+
+	--pnp-background: #050407;
+	--pnp-surface: #100d14;
+	--pnp-cream: #0d0a11;
+	--pnp-border: #292230;
+	--pnp-nav: rgba(5, 4, 7, 0.88);
+
+	--pnp-on-dark: #faf7ff;
+	--pnp-on-dark-muted: #bdb2ca;
+
+	--pnp-glow: rgba(249, 115, 22, 0.24);
+	--pnp-mark: rgba(251, 146, 60, 0.1);
+	--pnp-process-line: #30263a;
+
+	--pnp-gradient-background:
+		radial-gradient(circle at 82% 8%, rgba(124, 45, 18, 0.3), transparent 34%),
+		linear-gradient(145deg, #050403 0%, #0c0806 52%, #160b07 100%);
+	--pnp-gradient-brand: linear-gradient(135deg, #030202 0%, #251007 48%, #7c2d12 120%);
+	--pnp-gradient-contact: linear-gradient(135deg, #020101 0%, #1d0b05 55%, #8b2518 145%);
+	--pnp-gradient-text: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ef4444 100%);
+	--pnp-footer: #020103;
+
+	--pnp-danger: #f87171;
+	--pnp-success: #4ade80;
+	--pnp-success-soft: rgba(74, 222, 128, 0.12);
+}
+
+/* Expose tokens as Tailwind utilities: bg-surface, text-muted, border-line, etc. */
+@theme inline {
+	--color-fg: var(--pnp-text);
+	--color-muted: var(--pnp-text-muted);
+	--color-primary: var(--pnp-primary);
+	--color-primary-deep: var(--pnp-primary-deep);
+	--color-accent: var(--pnp-accent);
+	--color-highlight: var(--pnp-highlight);
+	--color-brand-soft: var(--pnp-brand-soft);
+	--color-on-primary: var(--pnp-on-primary);
+	--color-background: var(--pnp-background);
+	--color-surface: var(--pnp-surface);
+	--color-cream: var(--pnp-cream);
+	--color-line: var(--pnp-border);
+	--color-nav: var(--pnp-nav);
+	--color-on-dark: var(--pnp-on-dark);
+	--color-on-dark-muted: var(--pnp-on-dark-muted);
+	--color-mark: var(--pnp-mark);
+	--color-footer: var(--pnp-footer);
+	--color-danger: var(--pnp-danger);
+	--color-success: var(--pnp-success);
+	--color-success-soft: var(--pnp-success-soft);
+}
+
+@layer base {
+	body {
+		color: var(--pnp-text);
+		background-color: var(--pnp-background);
+		background-image: var(--pnp-gradient-background);
+		background-attachment: fixed;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	::selection {
+		background-color: var(--pnp-brand-soft);
+		color: #17151a;
+	}
+}
+
+@layer components {
+	.card {
+		background-color: var(--pnp-surface);
+		border: 1px solid var(--pnp-border);
+		border-radius: 0.875rem;
+		box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+	}
+
+	/* Login / signup card: centered, roomier, with an orange-to-red gradient border. */
+	.auth-card {
+		width: 100%;
+		max-width: 28rem;
+		border: 2px solid transparent;
+		border-radius: 1.25rem;
+		background:
+			linear-gradient(var(--pnp-surface), var(--pnp-surface)) padding-box,
+			var(--pnp-gradient-text) border-box;
+		box-shadow: 0 20px 50px var(--pnp-glow);
+		padding: 2rem 1.5rem;
+	}
+	@media (min-width: 640px) {
+		.auth-card {
+			padding: 2.75rem 2.5rem;
+		}
+	}
+
+	.field-label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--pnp-text);
+	}
+
+	.input {
+		margin-top: 0.25rem;
+		width: 100%;
+		border-radius: 0.5rem;
+		border: 1px solid var(--pnp-border);
+		background-color: var(--pnp-surface);
+		color: var(--pnp-text);
+		padding: 0.5rem 0.75rem;
+	}
+	.input::placeholder {
+		color: var(--pnp-text-muted);
+		opacity: 0.8;
+	}
+	.input:focus,
+	.checkbox:focus {
+		outline: none;
+		border-color: var(--pnp-primary);
+		--tw-ring-color: var(--pnp-glow);
+		box-shadow: 0 0 0 3px var(--pnp-glow);
+	}
+
+	.checkbox {
+		border-radius: 0.25rem;
+		border: 1px solid var(--pnp-border);
+		background-color: var(--pnp-surface);
+		color: var(--pnp-primary);
+	}
+
+	.btn-primary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		border-radius: 0.5rem;
+		background-color: var(--pnp-primary);
+		color: var(--pnp-on-primary);
+		padding: 0.5rem 1rem;
+		font-weight: 600;
+		transition:
+			background-color 150ms,
+			box-shadow 150ms;
+	}
+	.btn-primary:hover {
+		background-color: var(--pnp-highlight);
+		box-shadow: 0 6px 20px var(--pnp-glow);
+	}
+	.btn-primary:focus-visible {
+		outline: 2px solid var(--pnp-primary);
+		outline-offset: 2px;
+	}
+
+	.link {
+		color: var(--pnp-primary);
+		font-weight: 500;
+	}
+	.link:hover {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	.badge {
+		display: inline-flex;
+		align-items: center;
+		border-radius: 9999px;
+		padding: 0.125rem 0.625rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+	.badge-saved {
+		background-color: var(--pnp-mark);
+		color: var(--pnp-primary);
+	}
+	.badge-applied {
+		background-color: var(--pnp-success-soft);
+		color: var(--pnp-success);
+	}
+
+	.notice {
+		border-radius: 0.625rem;
+		border: 1px solid color-mix(in srgb, var(--pnp-primary) 30%, transparent);
+		background-color: var(--pnp-mark);
+		color: var(--pnp-text);
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+	}
+
+	.text-gradient {
+		background-image: var(--pnp-gradient-text);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+}
