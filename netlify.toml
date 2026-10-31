@@ -1,0 +1,15 @@
+# Netlify build settings. Env vars (DATABASE_URL, ORIGIN, ...) are set in the
+# Netlify UI: Site configuration → Environment variables.
+
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# Production deploys bring the database schema up to date before building.
+# If a migration fails, the build fails and the live site is left untouched.
+# Deploy previews / branch deploys skip this so they never change the database.
+[context.production]
+  command = "node scripts/migrate.js && npm run build"

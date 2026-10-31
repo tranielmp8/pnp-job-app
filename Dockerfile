@@ -1,5 +1,10 @@
+# NOT USED RIGHT NOW: the app deploys on Netlify (see netlify.toml).
+# Kept for a possible VPS/Coolify deploy later. ADAPTER=node below makes
+# the build produce a Node server instead of Netlify functions.
+
 # ---- build ----
 FROM node:24-alpine AS build
+ENV ADAPTER=node
 WORKDIR /app
 
 COPY package.json package-lock.json .npmrc ./
@@ -11,7 +16,7 @@ RUN npm run build && npm prune --omit=dev
 # ---- runtime ----
 FROM node:24-alpine
 WORKDIR /app
-# BODY_SIZE_LIMIT: adapter-node rejects bodies over 512K by default; resume uploads allow 5 MB.
+# BODY_SIZE_LIMIT: adapter-node rejects bodies over 512K by default; resume uploads allow 4 MB.
 ENV NODE_ENV=production \
     PORT=3000 \
     UPLOAD_DIR=/app/uploads \

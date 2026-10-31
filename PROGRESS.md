@@ -23,8 +23,9 @@ We use official job APIs instead of scraping LinkedIn/Indeed directly (scraping 
 | Database | Postgres via Drizzle ORM (postgres.js) |
 | Auth | Better Auth (email + password) |
 | Job data | JSearch (RapidAPI) + Adzuna |
-| Hosting | VPS + Coolify, `@sveltejs/adapter-node` |
-| Resume storage | Local disk at `UPLOAD_DIR` (Coolify persistent volume); S3/R2 later if needed |
+| Hosting | **Netlify** (`@sveltejs/adapter-netlify`). Dockerfile + `adapter-node` kept for a possible VPS later |
+| Database | Postgres on **Railway** |
+| Resume storage | **Railway bucket** (S3-compatible) via `STORAGE_DRIVER=s3`; links-only until set up |
 
 ## Data separation rules
 
@@ -96,11 +97,11 @@ We use official job APIs instead of scraping LinkedIn/Indeed directly (scraping 
 ### ✅ Phase 3 — Resume (done, 2026-10-25)
 - [x] Schema: `resume.kind` = `link` | `file`; `url` for links; file columns now nullable (pushed to DB)
 - [x] **Links (live now):** Google Drive / Docs links show an embedded preview (`/preview` URL); other https links open in a new tab. Drive files must be shared "Anyone with the link"
-- [x] **File uploads (ready, off by default):** PDF, DOCX, PNG, JPG, WebP up to 5 MB. Type is checked from the file's bytes, not the name
+- [x] **File uploads (ready, off by default):** PDF, DOCX, PNG, JPG, WebP up to 4 MB (was 5 MB; lowered for Netlify's ~6 MB request limit). Type is checked from the file's bytes, not the name
 - [x] Storage layer `src/lib/server/storage/`: `StorageDriver` interface (`put` / `get` / `delete`) chosen by `STORAGE_DRIVER`
   - `none` (default): uploads hidden, links only
-  - `local`: files in `UPLOAD_DIR` (works on Coolify with a persistent volume)
-  - **TODO when the bucket exists:** add `s3.ts` (S3-compatible, e.g. MinIO on Coolify), add `s3` to `STORAGE_DRIVER`, add bucket env vars
+  - `local`: files in `UPLOAD_DIR` (needs a persistent disk — not on Netlify)
+  - `s3` (2026-10-31): `s3.ts`, any S3-compatible bucket (Railway bucket). Env: `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION` (default `auto`), `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_FORCE_PATH_STYLE`. Builds and type-checks; **not yet tested against a real bucket**
 - [x] `/resume/[id]/file`: streams files to their owner only; PDFs/images inline, DOCX as download; `nosniff`; sandbox CSP for non-PDFs
 - [x] `/resume` page: list, default badge, Make default, Delete (removes the stored file too; next resume becomes default), Link / Upload tabs, preview panel
 - [x] Default resume is attached automatically on Apply; `/applications` has a "Resume sent" dropdown (only your own resumes are accepted)
@@ -112,14 +113,16 @@ We use official job APIs instead of scraping LinkedIn/Indeed directly (scraping 
 - Saved searches + scheduled fetch, new-match alerts
 - Optional AI match scoring of job vs. resume
 
-## Deployment notes (Coolify, Dockerfile build pack)
-- Local development stays the same (`npm run dev`); the `Dockerfile` is only used by Coolify when deploying.
-- `Dockerfile`: multi-stage `node:24-alpine`, runs `node build` as the `node` user, listens on port **3000**.
-- Set env vars in Coolify: `DATABASE_URL`, `ORIGIN` (public URL), `BETTER_AUTH_SECRET`, `RAPIDAPI_KEY`, `ADZUNA_APP_ID`, `ADZUNA_API_KEY`, `JOB_PROVIDERS`, `STORAGE_DRIVER`. `UPLOAD_DIR` defaults to `/app/uploads` in the image.
-- Mount a persistent volume at `/app/uploads` so resumes survive redeploys.
-- **Migrations run automatically on every container start** (`scripts/migrate.js`, before `node build`). SQL files live in `drizzle/`; applied ones are tracked in the DB and skipped. If a migration fails, the app doesn't start and the error is in the Coolify logs.
-- `drizzle-kit` is not in the production image (dev dependency), so `npm run db:push` can't run in the Coolify terminal — and doesn't need to.
-- `drizzle-orm` and `postgres` are runtime `dependencies` (needed by the migrate script).
-- **Schema change workflow:** edit `schema.ts` → `npm run db:generate` → commit the new file in `drizzle/` → push. Coolify applies it on deploy. Locally, keep using `npm run db:push`.
-- 2026-10-31: migrations tested on an empty DB (all 8 tables created; second run skips). Production install + app boot simulated locally. The Docker image itself hasn't been built locally (Docker Desktop wasn't running); the first Coolify deploy is its first real test.
-- The dev DB in `.env` is hosted on Railway, not local.
+## Deployment notes (Netlify, since 2026-10-31)
+- Switched from Coolify to **Netlify**. `vite.config.ts` uses `adapter-netlify` by default; `ADAPTER=node` switches to `adapter-node` (the Dockerfile sets this).
+- `netlify.toml`: build `npm run build`, publish `build`, Node 24. **Production** deploys run `node scripts/migrate.js` first (build fails, live site untouched, if a migration fails). Deploy previews skip migrations.
+- Netlify env vars: `DATABASE_URL` (Railway **public** URL), `ORIGIN` (the exact public site URL, `https://`, no trailing slash — wrong value → "Cross-site POST form submissions are forbidden" / login issues), `BETTER_AUTH_SECRET`, `RAPIDAPI_KEY`, `JOB_PROVIDERS`, `STORAGE_DRIVER`, and the `S3_*` vars for the bucket.
+- **Schema change workflow:** edit `schema.ts` → `npm run db:generate` → commit the new file in `drizzle/` → push. Production deploy applies it.
+- `drizzle-orm`, `postgres`, `@aws-sdk/client-s3` are runtime `dependencies`.
+- Serverless caveats: the 30-minute in-memory search cache only lives as long as a function instance, so cache hits are rarer; Netlify functions time out after ~10s by default (JSearch takes 3–8s).
+- The existing Railway DB was created with `db:push` (no migration history), so `migrate.js` can't run against it as-is. See open question below.
+
+### Dockerfile (not used right now)
+- Kept in the repo for a possible VPS/Coolify deploy. Netlify ignores it. Disconnect/delete the Coolify app so pushes don't trigger Coolify deploys.
+- Multi-stage `node:24-alpine`, `ADAPTER=node`, runs `scripts/migrate.js` then `node build` as the `node` user on port **3000**. Mount a volume at `/app/uploads` if using `STORAGE_DRIVER=local`.
+- Never built locally (Docker Desktop wasn't running); production install + boot was simulated.

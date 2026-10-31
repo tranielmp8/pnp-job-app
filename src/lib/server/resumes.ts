@@ -7,7 +7,8 @@ import { getStorage } from '#lib/server/storage/index.ts';
 
 export type Resume = typeof resume.$inferSelect;
 
-export const MAX_FILE_BYTES = 5 * 1024 * 1024;
+// Netlify functions reject request bodies over ~6 MB, so keep files well under that.
+export const MAX_FILE_BYTES = 4 * 1024 * 1024;
 export const ACCEPT = '.pdf,.docx,.png,.jpg,.jpeg,.webp';
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -81,7 +82,8 @@ export async function addFile(userId: string, label: string, file: File) {
 	const storage = getStorage();
 	if (!storage) throw new ResumeError('File uploads are not enabled yet. Add a link instead.');
 	if (file.size === 0) throw new ResumeError('Choose a file to upload.');
-	if (file.size > MAX_FILE_BYTES) throw new ResumeError('Files must be 5 MB or smaller.');
+	if (file.size > MAX_FILE_BYTES)
+		throw new ResumeError(`Files must be ${MAX_FILE_BYTES / 1024 / 1024} MB or smaller.`);
 
 	const bytes = new Uint8Array(await file.arrayBuffer());
 	const type = sniff(bytes, file.name);

@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite';
-import adapter from '@sveltejs/adapter-node';
+import netlifyAdapter from '@sveltejs/adapter-netlify';
+import nodeAdapter from '@sveltejs/adapter-node';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
@@ -13,8 +14,9 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 
-			// Deployed as a Node server on a VPS via Coolify.
-			adapter: adapter()
+			// Deployed on Netlify. The Dockerfile sets ADAPTER=node to build a plain
+			// Node server instead (kept for a possible VPS/Coolify deploy later).
+			adapter: process.env.ADAPTER === 'node' ? nodeAdapter() : netlifyAdapter()
 		})
 	]
 });
