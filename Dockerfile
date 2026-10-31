@@ -20,10 +20,15 @@ ENV NODE_ENV=production \
 COPY --from=build /app/build ./build
 COPY --from=build /app/node_modules ./node_modules
 COPY package.json ./
+# SQL migrations, applied on every start by scripts/migrate.js.
+COPY drizzle ./drizzle
+COPY scripts ./scripts
 
 # Resumes live here; mount a Coolify persistent volume at /app/uploads.
 RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 USER node
 
 EXPOSE 3000
-CMD ["node", "build"]
+# Bring the database schema up to date, then start the app.
+# If migrations fail the app does not start, so Coolify shows the error.
+CMD ["sh", "-c", "node scripts/migrate.js && exec node build"]

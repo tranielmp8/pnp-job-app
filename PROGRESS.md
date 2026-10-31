@@ -117,5 +117,9 @@ We use official job APIs instead of scraping LinkedIn/Indeed directly (scraping 
 - `Dockerfile`: multi-stage `node:24-alpine`, runs `node build` as the `node` user, listens on port **3000**.
 - Set env vars in Coolify: `DATABASE_URL`, `ORIGIN` (public URL), `BETTER_AUTH_SECRET`, `RAPIDAPI_KEY`, `ADZUNA_APP_ID`, `ADZUNA_API_KEY`, `JOB_PROVIDERS`, `STORAGE_DRIVER`. `UPLOAD_DIR` defaults to `/app/uploads` in the image.
 - Mount a persistent volume at `/app/uploads` so resumes survive redeploys.
-- Schema changes: run `npm run db:push` (or migrations) against the production DB before deploying. Not automated yet.
-- The Dockerfile hasn't been built yet; the first Coolify deploy is its first real test.
+- **Migrations run automatically on every container start** (`scripts/migrate.js`, before `node build`). SQL files live in `drizzle/`; applied ones are tracked in the DB and skipped. If a migration fails, the app doesn't start and the error is in the Coolify logs.
+- `drizzle-kit` is not in the production image (dev dependency), so `npm run db:push` can't run in the Coolify terminal — and doesn't need to.
+- `drizzle-orm` and `postgres` are runtime `dependencies` (needed by the migrate script).
+- **Schema change workflow:** edit `schema.ts` → `npm run db:generate` → commit the new file in `drizzle/` → push. Coolify applies it on deploy. Locally, keep using `npm run db:push`.
+- 2026-10-31: migrations tested on an empty DB (all 8 tables created; second run skips). Production install + app boot simulated locally. The Docker image itself hasn't been built locally (Docker Desktop wasn't running); the first Coolify deploy is its first real test.
+- The dev DB in `.env` is hosted on Railway, not local.
