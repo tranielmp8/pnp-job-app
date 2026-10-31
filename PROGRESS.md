@@ -1,6 +1,6 @@
 # YoureHired — Project Plan & Progress
 
-_Last updated: 2026-10-25_
+_Last updated: 2026-10-31_
 
 ## What we're building
 
@@ -43,7 +43,7 @@ We use official job APIs instead of scraping LinkedIn/Indeed directly (scraping 
 ## Phases
 
 ### ✅ Phase 0 — Foundation (done)
-- [x] `git init` (branch `main`) — nothing committed yet
+- [x] `git init` (branch `main`); initial commit made
 - [x] Switched to `@sveltejs/adapter-node` for Coolify; `npm run build` passes
 - [x] `Dockerfile` + `.dockerignore` for Coolify deployment
 - [x] Better Auth schema written by hand (`npm run auth:schema` fails: CLI can't resolve SvelteKit 3's `$app/tsconfig`)
@@ -107,7 +107,8 @@ We use official job APIs instead of scraping LinkedIn/Indeed directly (scraping 
 - [x] Dockerfile sets `BODY_SIZE_LIMIT=6M` (adapter-node default is 512K)
 - [x] Tested end to end: links + embed, http/javascript links rejected, PDF/PNG upload + byte-exact download, disguised .exe rejected, other user gets 404 on files and can't set default/delete/attach, delete promotes next default and removes the file, uploads refused when `STORAGE_DRIVER=none`
 
-### Phase 4 — Extras
+### ⏸️ Phase 4 — Extras (on hold, 2026-10-31)
+- **Waiting on a paid JSearch subscription.** Scheduled fetches and alerts would use up the free quota too fast. Start this phase once the plan is upgraded.
 - Saved searches + scheduled fetch, new-match alerts
 - Optional AI match scoring of job vs. resume
 
