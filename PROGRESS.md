@@ -1,6 +1,6 @@
 # YoureHired — Project Plan & Progress
 
-_Last updated: 2026-10-31_
+_Last updated: 2026-11-02_
 
 ## What we're building
 
@@ -101,7 +101,7 @@ We use official job APIs instead of scraping LinkedIn/Indeed directly (scraping 
 - [x] Storage layer `src/lib/server/storage/`: `StorageDriver` interface (`put` / `get` / `delete`) chosen by `STORAGE_DRIVER`
   - `none` (default): uploads hidden, links only
   - `local`: files in `UPLOAD_DIR` (needs a persistent disk — not on Netlify)
-  - `s3` (2026-10-31): `s3.ts`, any S3-compatible bucket (Railway bucket). Env: `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION` (default `auto`), `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_FORCE_PATH_STYLE`. Builds and type-checks; **not yet tested against a real bucket**
+  - `s3` (2026-10-31): `s3.ts`, any S3-compatible bucket (Railway bucket). Env: `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION` (default `auto`), `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_FORCE_PATH_STYLE`. 2026-11-02: tested against the real Railway bucket (endpoint `t3.storageapi.dev`, region `auto`, path style `false`): put / read back / delete OK
 - [x] `/resume/[id]/file`: streams files to their owner only; PDFs/images inline, DOCX as download; `nosniff`; sandbox CSP for non-PDFs
 - [x] `/resume` page: list, default badge, Make default, Delete (removes the stored file too; next resume becomes default), Link / Upload tabs, preview panel
 - [x] Default resume is attached automatically on Apply; `/applications` has a "Resume sent" dropdown (only your own resumes are accepted)
